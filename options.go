@@ -6,6 +6,13 @@ import (
 	"time"
 )
 
+const (
+	defCPUPercent    = 1
+	defMemoryPercent = 1
+	defPolling       = time.Second
+	defWaiting       = time.Second * 5
+)
+
 // Options models command line options
 type Options struct {
 	Pid           int64
@@ -28,7 +35,7 @@ func NewOptions() *Options {
 	flag.BoolVar(&opts.RestartOnEnd, "restart", false, "restart process if terminated")
 	flag.DurationVar(&opts.Waiting, "wait", defWaiting, "time to wait before polling again after a restart")
 	flag.Usage = func() {
-		programInfo()
+		PrintInfo()
 		fmt.Println("usage:")
 		flag.PrintDefaults()
 	}

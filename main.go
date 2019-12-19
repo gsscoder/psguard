@@ -5,14 +5,15 @@ import (
 )
 
 func main() {
-	opts := NewOptions()
-	if opts == nil {
-		programInfo()
+	options := NewOptions()
+	if options == nil {
+		PrintInfo()
 		os.Exit(0)
 	}
-	err := opts.Validate()
-	if err != nil {
+	if err := options.Validate(); err != nil {
 		Exit(err.Error(), true)
 	}
-	NewApp(opts)
+
+	server := NewPollServer(*options)
+	server.Start()
 }
