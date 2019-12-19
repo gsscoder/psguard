@@ -90,8 +90,7 @@ func processFromExe(path string) (*process.Process, error) {
 		return nil, makeError()
 	}
 	for _, process := range processes {
-		exe, _ := process.Exe()
-		if exe == path {
+		if exe, _ := process.Exe(); exe == path {
 			return process, nil
 		}
 	}

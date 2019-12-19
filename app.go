@@ -29,8 +29,7 @@ func NewApp(opts *Options) {
 		switch {
 		case err != nil:
 			if opts.RestartOnEnd {
-				err := lastProc.Start()
-				if err != nil {
+				if err := lastProc.Start(); err != nil {
 					fail(err.Error())
 				}
 				log.Printf("Process '%s' restarted\n", lastProc.Exe)
