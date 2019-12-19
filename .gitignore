@@ -2,6 +2,8 @@
 .DS_Store
 .vscode/
 artifacts/
+psguard
+psguard.log
 
 # Binaries for programs and plugins
 *.exe
