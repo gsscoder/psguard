@@ -14,7 +14,6 @@ type Options struct {
 	Polling       time.Duration
 	RestartOnEnd  bool
 	Waiting       time.Duration
-	Log           string
 }
 
 // NewOptions parses command line options
