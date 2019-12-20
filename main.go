@@ -14,6 +14,6 @@ func main() {
 		Exit(err.Error(), true)
 	}
 
-	server := NewPollServer(*options)
+	server := NewPollManager(*options)
 	server.Start()
 }
