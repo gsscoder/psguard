@@ -59,20 +59,20 @@ Password:
 **psguard.json**:
 ```json
 {
-	"constraints": {
-		"firefox":
-			{
-				"pid": 56575,
-				"cpu": 0.5,
-				"mem": 1
-			},
-		"evernote":
-			{
-				"pid": 44208,
-				"cpu": 0.5,
-				"mem": 1
-			}
-	}
+    "constraints": {
+        "firefox":
+            {
+                "pid": 56575,
+                "cpu": 0.5,
+                "mem": 1
+            },
+        "evernote":
+            {
+                "pid": 44208,
+                "cpu": 0.5,
+                "mem": 1
+            }
+    }
 }
 ```
 
