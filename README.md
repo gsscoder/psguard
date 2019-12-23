@@ -22,36 +22,59 @@ $ ./artifacts/psguard -version
 ## Usage
 
 ```sh
-$ ./psguard -help 
-psguard: Polls a process for resources consumption and existence
-Version: v0.1.0
+$ ./psguard -help   
+psguard: Polls processes for resources consumption and existence
+Version: v0.2.0
 usage:
-  -cpu float
-    	allowed CPU % usage (default 1)
-  -mem float
-    	allowed memory % usage (default 1)
-  -pid int
-    	pid of the process to monitor
   -poll duration
-    	defines polling interval (default 1s)
+        defines polling interval (default 1s)
   -restart
-    	restart process if terminated
+        restart process if terminated
   -version
-    	displays version information
+        displays version information
   -wait duration
-    	time to wait before polling again after a restart (default 5s)
+        time to wait before polling again after a restart (default 5s)
 
 $ ps -A | grep firefox
-14195 ??         1:01.92 /Applications/Firefox.app/Contents/MacOS/firefox
-$ ./psguard -pid 14195 -restart 2>>psguard.log &
-[1] 30867
+92697 ??         1:58.34 /Applications/Firefox.app/Contents/MacOS/firefox
+$ ps -A | grep Evernote
+92663 ??         0:06.16 /Applications/Evernote.app/Contents/MacOS/Evernote
+$ jj -i psguard.json -o psguard.json -v 92697 constraints.firefox.pid
+$ jj -i psguard.json -o psguard.json -v 92663 constraints.evernote.pid
+
+$ ./psguard -restart 2>>psguard.log &
+[2] 80757
 $ tail -f psguard.log
-2019/12/18 20:52:49 CPU constraint of 1.00% violated by +9.63%
-2019/12/18 20:52:49 Memory constraint of 1.00% violated by +2.84%
-2019/12/18 20:52:51 CPU constraint of 1.00% violated by +9.60%
-2019/12/18 20:52:51 Memory constraint of 1.00% violated by +2.80%
+2019/12/23 08:07:57 firefox: CPU constraint of 0.50% violated by +38.28%
+2019/12/23 08:07:57 firefox: Memory constraint of 1.00% violated by +2.14%
+2019/12/23 08:08:03 evernote: CPU constraint of 0.50% violated by +0.68%
+2019/12/23 08:08:03 evernote: Memory constraint of 1.00% violated by +0.24%
 ...
-$ sudo kill 30867
+$ sudo kill 80757
 Password:
-[1]  + terminated  ./psguard -pid 14195 2>> psguard.log
+[2]  + terminated  ./psguard -restart 2>> psguard.log
 ```
+
+## Configuration
+**psguard.json**:
+```json
+{
+	"constraints": {
+		"firefox":
+			{
+				"pid": 56575,
+				"cpu": 0.5,
+				"mem": 1
+			},
+		"evernote":
+			{
+				"pid": 44208,
+				"cpu": 0.5,
+				"mem": 1
+			}
+	}
+}
+```
+
+### Notes
+- Command [JJ](https://github.com/tidwall/jj) used to edit `psguard.json` from terminal can be installed on **macOS** with `brew install tidwall/jj/jj`.

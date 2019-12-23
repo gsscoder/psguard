@@ -7,59 +7,84 @@ import (
 
 // PollManager models a poll server
 type PollManager struct {
-	Settings   *Options
-	StopSignal chan struct{}
+	Polling      time.Duration
+	RestartOnEnd bool
+	Waiting      time.Duration
+	Constraints  []Constraint
+	Terminated   chan struct{}
 }
 
 // NewPollManager builds a new instance of PollServer
-func NewPollManager(settings Options) *PollManager {
-	return &PollManager{Settings: &settings}
+func NewPollManager(settings Options, constr []Constraint) *PollManager {
+	return &PollManager{
+		Polling:      settings.Polling,
+		RestartOnEnd: settings.RestartOnEnd,
+		Waiting:      settings.Waiting,
+		Constraints:  constr}
 }
 
 // Start begins the polling loop
 func (p PollManager) Start() {
-	p.StopSignal = make(chan struct{})
+	p.Terminated = make(chan struct{})
 
-	process, err := NewProcessInfo(int32(p.Settings.Pid))
-	if err != nil {
-		Fail(err.Error())
+polling:
+	go p.poll()
+	<-p.Terminated
+	if p.allTerminated() {
+		close(p.Terminated)
+	} else {
+		goto polling
 	}
-	go p.poll(*process, *p.Settings)
-	<-p.StopSignal
-	close(p.StopSignal)
 }
 
-func (p PollManager) poll(process ProcessInfo, settings Options) {
-	var lastProcess *ProcessInfo
+func (p PollManager) poll() {
 	for {
-		process, err := NewProcessInfoFromExe(process.Exe)
-		switch err {
-		case nil:
-			lastProcess = process.Clone()
-			if process.CPUPercent > p.Settings.CPUPercent {
-				log.Printf("CPU constraint of %.2f%% violated by +%.2f%%",
-					p.Settings.CPUPercent, process.CPUPercent-p.Settings.CPUPercent)
-			}
-			if process.MemoryPercent > p.Settings.MemoryPercent {
-				log.Printf("Memory constraint of %.2f%% violated by +%.2f%%",
-					p.Settings.MemoryPercent, process.MemoryPercent-p.Settings.MemoryPercent)
-			}
-		default:
-			if p.Settings.RestartOnEnd {
-				if err := lastProcess.Start(); err != nil {
-					log.Fatal(err.Error())
-					p.stop()
-				}
-				log.Printf("Process '%s' restarted\n", lastProcess.Exe)
-				time.Sleep(p.Settings.Waiting)
-			} else {
+		for _, constr := range p.Constraints {
+			p.pollProcess(constr)
+		}
+		time.Sleep(p.Polling)
+	}
+}
+
+func (p PollManager) pollProcess(constr Constraint) {
+	proc, err := NewProcessInfoFromExe(constr.Process.Exe)
+	switch err {
+	case nil:
+		if proc.CPUPercent > constr.CPUPercent {
+			log.Printf("%s: CPU constraint of %.2f%% violated by +%.2f%%",
+				constr.Name, constr.CPUPercent, proc.CPUPercent-constr.CPUPercent)
+		}
+		if proc.MemoryPercent > constr.MemoryPercent {
+			log.Printf("%s: Memory constraint of %.2f%% violated by +%.2f%%",
+				constr.Name, constr.MemoryPercent, proc.MemoryPercent-constr.MemoryPercent)
+		}
+	default:
+		constr.Process.Terminated = true
+		log.Printf("Process %s terminated", constr.Name)
+		if p.RestartOnEnd {
+			if err := constr.Process.Start(); err != nil {
+				log.Fatal(err.Error())
 				p.stop()
 			}
+			constr.Process.Terminated = false
+			log.Printf("Process %s restarted\n", constr.Process.Exe)
+			time.Sleep(p.Waiting)
+		} else {
+			p.stop()
 		}
-		time.Sleep(p.Settings.Polling)
 	}
+}
+
+func (p PollManager) allTerminated() bool {
+	n := 0
+	for _, constr := range p.Constraints {
+		if constr.Process.Terminated {
+			n++
+		}
+	}
+	return n == len(p.Constraints)
 }
 
 func (p PollManager) stop() {
-	p.StopSignal <- struct{}{}
+	p.Terminated <- struct{}{}
 }

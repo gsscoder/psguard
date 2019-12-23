@@ -14,6 +14,7 @@ type ProcessInfo struct {
 	Cmdline       []string
 	CPUPercent    float64
 	MemoryPercent float64
+	Terminated    bool
 }
 
 // NewProcessInfoFromExe builds a new ProcessInfo instance for a given name
@@ -32,17 +33,6 @@ func NewProcessInfo(pid int32) (*ProcessInfo, error) {
 		return nil, fmt.Errorf("Process %d not found", pid)
 	}
 	return newProcessInfo(*process)
-}
-
-// Clone performs a deep copy of ProcessInfo instance
-func (p ProcessInfo) Clone() *ProcessInfo {
-	return &ProcessInfo{
-		Pid:           p.Pid,
-		Exe:           p.Exe,
-		Cmdline:       p.Cmdline,
-		CPUPercent:    p.CPUPercent,
-		MemoryPercent: p.MemoryPercent,
-	}
 }
 
 // Start spawns a process without owning it with original command line
@@ -84,7 +74,7 @@ func newProcessInfo(proc process.Process) (*ProcessInfo, error) {
 }
 
 func processFromExe(path string) (*process.Process, error) {
-	makeError := func() error { return fmt.Errorf("Can not find process with path '%s'", path) }
+	makeError := func() error { return fmt.Errorf("Can not find process with path \"%s\"", path) }
 	processes, err := process.Processes()
 	if err != nil {
 		return nil, makeError()

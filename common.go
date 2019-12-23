@@ -2,14 +2,19 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 )
 
 const (
 	ProgramName    = "psguard"
-	ProgramTitle   = "Polls a process for resources consumption and existence"
-	ProgramVersion = "v0.1.0"
+	ProgramTitle   = "Polls processes for resources consumption and existence"
+	ProgramVersion = "v0.2.0"
+)
+
+var (
+	ConfigPath = fmt.Sprintf("./%s.json", ProgramName)
 )
 
 func Exit(message string, help bool) {
@@ -28,4 +33,15 @@ func PrintInfo() {
 func Fail(message string) {
 	log.Fatal(message)
 	os.Exit(1)
+}
+
+func ReadText(path string) string {
+	file, err := os.Open(path)
+	if err == nil {
+		content, err := ioutil.ReadAll(file)
+		if err == nil {
+			return string(content)
+		}
+	}
+	return ""
 }
