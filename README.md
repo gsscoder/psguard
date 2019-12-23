@@ -1,6 +1,6 @@
 # psguard
 
-Simple program to poll a process for resources consumption and existence. On request it can revive the process when dies. Built with [gopsutil](github.com/shirou/gopsutil).
+Simple program to poll a process for resources consumption and existence. On request it can revive the process when dies. Built with [gopsutil](https://github.com/shirou/gopsutil) and [gjson](https://github.com/tidwall/gjson).
 
 ## Build
 
