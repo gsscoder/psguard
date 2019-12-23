@@ -37,13 +37,3 @@ func LoadConstraintList() []Constraint {
 	})
 	return constraints
 }
-
-func ExcludeUnboundPids(constraints []Constraint) []Constraint {
-	filtered := make([]Constraint, 0)
-	for _, constr := range constraints {
-		if constr.Process != nil {
-			filtered = append(filtered, constr)
-		}
-	}
-	return filtered
-}

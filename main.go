@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 )
@@ -18,23 +17,14 @@ func main() {
 	}
 	for i, constr := range constraints {
 		if constr.CPUPercent < 0 {
-			Fail(fmt.Sprintf("Invalid CPU constraint for %s", constr.Name))
+			constraints[i].CPUPercent = defCPUPercent
+			log.Printf("CPU constraint for %s invalid, setted to default (%.2f%%)", constr.Name, options.CPUPercent)
 		}
 		if constr.MemoryPercent < 0 {
-			Fail(fmt.Sprintf("Invalid Memory constraint for %s", constr.Name))
-		}
-		process, err := NewProcessInfo(constr.Pid)
-		if err == nil {
-			constraints[i].Process = process
-		} else {
-			log.Fatalf("Can't find process %s", constr.Name)
+			constraints[i].MemoryPercent = defMemoryPercent
+			log.Printf("Memory constraint for %s invalid, setted to default (%.2f%%)", constr.Name, options.MemoryPercent)
 		}
 	}
-	boundConstraints := ExcludeUnboundPids(constraints)
-	if len(boundConstraints) == 0 {
-		Fail("No process to poll")
-	}
-
-	server := NewPollManager(*options, boundConstraints)
+	server := NewPollManager(*options, constraints)
 	server.Start()
 }

@@ -10,7 +10,7 @@ import (
 const (
 	ProgramName    = "psguard"
 	ProgramTitle   = "Polls processes for resources consumption and existence"
-	ProgramVersion = "v0.2.0"
+	ProgramVersion = "v0.3.0"
 )
 
 var (

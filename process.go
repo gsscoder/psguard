@@ -14,7 +14,6 @@ type ProcessInfo struct {
 	Cmdline       []string
 	CPUPercent    float64
 	MemoryPercent float64
-	Terminated    bool
 }
 
 // NewProcessInfoFromExe builds a new ProcessInfo instance for a given name

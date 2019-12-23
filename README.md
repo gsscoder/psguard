@@ -24,7 +24,7 @@ $ ./artifacts/psguard -version
 ```sh
 $ ./psguard -help   
 psguard: Polls processes for resources consumption and existence
-Version: v0.2.0
+Version: v0.3.0
 usage:
   -poll duration
         defines polling interval (default 1s)
@@ -78,3 +78,5 @@ Password:
 
 ### Notes
 - Command [JJ](https://github.com/tidwall/jj) used to edit `psguard.json` from terminal can be installed on **macOS** with `brew install tidwall/jj/jj`.
+- Restarted processes will die, when `psguard` terminates in case it wasn't started in background (tested only on **macOS**).
+- For now `psguard` needs to be killed, it will continue running even with nothing to do.

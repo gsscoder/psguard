@@ -2,13 +2,13 @@
     "constraints": {
         "firefox":
             {
-                "pid": 56575,
+                "pid": 61271,
                 "cpu": 0.5,
                 "mem": 1
             },
         "evernote":
             {
-                "pid": 44208,
+                "pid": 61266,
                 "cpu": 0.5,
                 "mem": 1
             }
