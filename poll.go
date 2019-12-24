@@ -11,7 +11,6 @@ type PollManager struct {
 	RestartOnEnd bool
 	Waiting      time.Duration
 	Constraints  []Constraint
-	// StopSignal   chan struct{}
 }
 
 // NewPollManager builds a new instance of PollServer
@@ -25,12 +24,10 @@ func NewPollManager(settings Options, constr []Constraint) *PollManager {
 
 // Start begins the polling loop
 func (p PollManager) Start() {
-	// p.StopSignal = make(chan struct{})
 	for {
 		p.poll()
 		time.Sleep(p.Polling)
 	}
-	//<-p.StopSignal
 }
 
 func (p PollManager) poll() {
