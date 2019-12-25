@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
@@ -28,11 +27,6 @@ func Exit(message string, help bool) {
 func PrintInfo() {
 	fmt.Printf("%s: %s\n", ProgramName, ProgramTitle)
 	fmt.Printf("Version: %s\n", ProgramVersion)
-}
-
-func Fail(message string) {
-	log.Fatal(message)
-	os.Exit(1)
 }
 
 func ReadText(path string) string {

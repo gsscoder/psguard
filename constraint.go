@@ -17,12 +17,8 @@ type Constraint struct {
 type ConstraintList []Constraint
 
 // NewConstraintList builds a list of constraint from configuration file
-func NewConstraintList() ConstraintList {
-	config := ReadText(ConfigPath)
-	if len(config) == 0 {
-		return []Constraint{}
-	}
-	result := gjson.Get(config, "constraints.process\\.groups")
+func NewConstraintList(json string) ConstraintList {
+	result := gjson.Get(json, "constraints.process\\.groups")
 	constraints := make([]Constraint, 0)
 	result.ForEach(func(key, value gjson.Result) bool {
 		name := key.Str

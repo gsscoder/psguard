@@ -11,12 +11,16 @@ func main() {
 		PrintInfo()
 		os.Exit(0)
 	}
-	constraints := NewConstraintList()
+	config := ReadText(ConfigPath)
+	if len(config) == 0 {
+		log.Fatal("Unable to read config file")
+	}
+	constraints := NewConstraintList(config)
 	if len(constraints) == 0 {
-		Fail("Process list is empty")
+		log.Fatal("Process list is empty")
 	}
 	if !constraints.HasProcesses() {
-		Fail("Unable to bind any process")
+		log.Fatal("Unable to bind any process")
 	}
 	messagges := constraints.Sanitize(*options)
 	for _, message := range messagges {
