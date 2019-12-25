@@ -4,6 +4,7 @@
 artifacts/
 psguard
 psguard.log
+*.bak
 
 # Binaries for programs and plugins
 *.exe
