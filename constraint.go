@@ -16,6 +16,7 @@ type Constraint struct {
 
 type ConstraintList []Constraint
 
+// NewConstraintList builds a list of constraint from configuration file
 func NewConstraintList() ConstraintList {
 	config := ReadText(ConfigPath)
 	if len(config) == 0 {
@@ -48,6 +49,7 @@ func NewConstraintList() ConstraintList {
 	return constraints
 }
 
+// Sanitize checks and sanitizes constraint values and produces messages when violated
 func (c ConstraintList) Sanitize(options Options) []string {
 	messages := make([]string, 0)
 	for i := 0; i < len(c); i++ {
@@ -67,6 +69,7 @@ func (c ConstraintList) Sanitize(options Options) []string {
 	return messages
 }
 
+// HasProcesses checks if at least one process is available for polling
 func (c ConstraintList) HasProcesses() bool {
 	for _, constr := range c {
 		if len(constr.Processes) > 0 {
