@@ -1,16 +1,19 @@
 {
     "constraints": {
-        "firefox":
+        "process.groups":
             {
-                "pid": 61271,
-                "cpu": 0.5,
-                "mem": 1
-            },
-        "evernote":
-            {
-                "pid": 61266,
-                "cpu": 0.5,
-                "mem": 1
-            }
+                "firefox":
+                    {
+                        "match": [ "firefox$" ],
+                        "cpu": 0.5,
+                        "mem": 1
+                    },
+                "evernote":
+                    {
+                        "match": [ "Evernote$" ],
+                        "cpu": 0.5,
+                        "mem": 1
+                    }
+                }
     }
 }

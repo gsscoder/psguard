@@ -9,7 +9,7 @@ import (
 const (
 	defCPUPercent    = 1
 	defMemoryPercent = 1
-	defPolling       = time.Second
+	defPolling       = time.Second * 2
 	defWaiting       = time.Second * 5
 )
 

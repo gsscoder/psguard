@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os/exec"
+	"regexp"
+	"time"
 
 	"github.com/shirou/gopsutil/process"
 )
@@ -14,33 +16,59 @@ type ProcessInfo struct {
 	Cmdline       []string
 	CPUPercent    float64
 	MemoryPercent float64
+	Restarted     *time.Time
 }
 
-// NewProcessInfoFromExe builds a new ProcessInfo instance for a given name
-func NewProcessInfoFromExe(path string) (*ProcessInfo, error) {
-	process, err := processFromExe(path)
+// ProcessInfoSliceFromRegexp builds a new slice of ProcessInfo instances for a pattern
+func ProcessInfoSliceFromRegexp(re regexp.Regexp) []ProcessInfo {
+	result := make([]ProcessInfo, 0)
+	processes, err := process.Processes()
 	if err != nil {
-		return nil, err
+		return result
 	}
-	return newProcessInfo(*process)
+	for _, process := range processes {
+		exe, err := process.Exe()
+		if err == nil {
+			if re.MatchString(exe) {
+				info, err := newProcessInfo(*process)
+				if err == nil {
+					result = append(result, *info)
+				}
+			}
+		}
+	}
+	return result
 }
 
-// NewProcessInfo builds a new ProcessInfo instance for a given pid
-func NewProcessInfo(pid int32) (*ProcessInfo, error) {
-	process, err := process.NewProcess(pid)
-	if err != nil {
-		return nil, fmt.Errorf("Process %d not found", pid)
+// Exists checks if a process does exists
+func (p ProcessInfo) Exists() bool {
+	exists, _ := process.PidExists(p.Pid)
+	return exists
+}
+
+func (p ProcessInfo) ViolationMessages(constr Constraint) []string {
+	messages := make([]string, 0)
+	if p.CPUPercent > constr.CPUPercent {
+		messages = append(messages,
+			fmt.Sprintf("%s: CPU constraint of %.2f%% violated by +%.2f%%",
+				constr.Name, constr.CPUPercent, p.CPUPercent-constr.CPUPercent))
 	}
-	return newProcessInfo(*process)
+	if p.MemoryPercent > constr.MemoryPercent {
+		messages = append(messages,
+			fmt.Sprintf("%s: Memory constraint of %.2f%% violated by +%.2f%%",
+				constr.Name, constr.MemoryPercent, p.MemoryPercent-constr.MemoryPercent))
+	}
+	return messages
 }
 
 // Start spawns a process without owning it with original command line
-func (p ProcessInfo) Start() error {
+func (p *ProcessInfo) Start() error {
 	cmd := exec.Command(p.Exe, p.Cmdline...)
 	err := cmd.Start()
 	if err != nil {
 		return fmt.Errorf("Can not start process %d", p.Pid)
 	}
+	p.Pid = int32(cmd.Process.Pid)
 	return nil
 }
 
@@ -70,18 +98,4 @@ func newProcessInfo(proc process.Process) (*ProcessInfo, error) {
 		Cmdline:       cmdline[1:],
 		CPUPercent:    cpu,
 		MemoryPercent: float64(mem)}, nil
-}
-
-func processFromExe(path string) (*process.Process, error) {
-	makeError := func() error { return fmt.Errorf("Can not find process with path \"%s\"", path) }
-	processes, err := process.Processes()
-	if err != nil {
-		return nil, makeError()
-	}
-	for _, process := range processes {
-		if exe, _ := process.Exe(); exe == path {
-			return process, nil
-		}
-	}
-	return nil, makeError()
 }

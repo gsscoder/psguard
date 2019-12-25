@@ -1,39 +1,77 @@
 package main
 
 import (
-	"strings"
+	"fmt"
+	"regexp"
 
 	"github.com/tidwall/gjson"
 )
 
 type Constraint struct {
 	Name          string
-	Pid           int32
 	CPUPercent    float64
 	MemoryPercent float64
-	Process       *ProcessInfo
+	Processes     []ProcessInfo
 }
 
-func LoadConstraintList() []Constraint {
-	config := strings.TrimSpace(ReadText(ConfigPath))
+type ConstraintList []Constraint
+
+func NewConstraintList() ConstraintList {
+	config := ReadText(ConfigPath)
 	if len(config) == 0 {
 		return []Constraint{}
 	}
-	result := gjson.Get(config, "constraints")
+	result := gjson.Get(config, "constraints.process\\.groups")
 	constraints := make([]Constraint, 0)
 	result.ForEach(func(key, value gjson.Result) bool {
-		name := key.String()
-		item := value.String()
-		pid := gjson.Get(item, "pid").Int()
-		cpu := gjson.Get(item, "cpu").Float()
-		mem := gjson.Get(item, "mem").Float()
+		name := key.Str
+		item := value.Raw
+		matches := gjson.Get(item, "match").Array()
+		processes := make([]ProcessInfo, 0)
+		for _, match := range matches {
+			re, err := regexp.Compile(match.Str)
+			if err == nil {
+				processes = append(processes,
+					ProcessInfoSliceFromRegexp(*re)...)
+			}
+		}
+		cpu := gjson.Get(item, "cpu").Num
+		mem := gjson.Get(item, "mem").Num
 		constraints = append(constraints, Constraint{
 			Name:          name,
-			Pid:           int32(pid),
 			CPUPercent:    cpu,
 			MemoryPercent: mem,
+			Processes:     processes,
 		})
 		return true
 	})
 	return constraints
+}
+
+func (c ConstraintList) Sanitize(options Options) []string {
+	messages := make([]string, 0)
+	for i := 0; i < len(c); i++ {
+		if c[i].CPUPercent < 0 {
+			c[i].CPUPercent = defCPUPercent
+			messages = append(messages,
+				fmt.Sprintf("CPU constraint for %s invalid, setted to default (%.2f%%)",
+					c[i].Name, options.CPUPercent))
+		}
+		if c[i].MemoryPercent < 0 {
+			c[i].MemoryPercent = defMemoryPercent
+			messages = append(messages,
+				fmt.Sprintf("Memory constraint for %s invalid, setted to default (%.2f%%)",
+					c[i].Name, options.MemoryPercent))
+		}
+	}
+	return messages
+}
+
+func (c ConstraintList) HasProcesses() bool {
+	for _, constr := range c {
+		if len(constr.Processes) > 0 {
+			return true
+		}
+	}
+	return false
 }

@@ -35,13 +35,6 @@ usage:
   -wait duration
         time to wait before polling again after a restart (default 5s)
 
-$ ps -A | grep firefox
-92697 ??         1:58.34 /Applications/Firefox.app/Contents/MacOS/firefox
-$ ps -A | grep Evernote
-92663 ??         0:06.16 /Applications/Evernote.app/Contents/MacOS/Evernote
-$ jj -i psguard.json -o psguard.json -v 92697 constraints.firefox.pid
-$ jj -i psguard.json -o psguard.json -v 92663 constraints.evernote.pid
-
 $ ./psguard -restart 2>>psguard.log &
 [2] 80757
 $ tail -f psguard.log
@@ -60,23 +53,26 @@ Password:
 ```json
 {
     "constraints": {
-        "firefox":
+        "process.groups":
             {
-                "pid": 56575,
-                "cpu": 0.5,
-                "mem": 1
-            },
-        "evernote":
-            {
-                "pid": 44208,
-                "cpu": 0.5,
-                "mem": 1
-            }
+                "firefox":
+                    {
+                        "match": [ "firefox$" ],
+                        "cpu": 0.5,
+                        "mem": 1
+                    },
+                "evernote":
+                    {
+                        "match": [ "Evernote$" ],
+                        "cpu": 0.5,
+                        "mem": 1
+                    }
+                }
     }
 }
 ```
+Each process group is identified by a name (like `firefox`) and all process bound to it are selected using one or more regular expression. The match is done using the executable path of the process (you can easly discover it with command `ps -A`). Defined constraints are expressed in percentage and are checked for all processes of a group.
 
 ### Notes
-- Command [JJ](https://github.com/tidwall/jj) used to edit `psguard.json` from terminal can be installed on **macOS** with `brew install tidwall/jj/jj`.
 - Restarted processes will die, when `psguard` terminates in case it wasn't started in background (tested only on **macOS**).
-- For now `psguard` needs to be killed, it will continue running even with nothing to do.
+- For now it's a [Go language](https://golang.org/) learning project and not much tests has been done on it. 
