@@ -1,6 +1,6 @@
 # psguard
 
-Simple program to poll a process for resources consumption and existence. On request it can revive the process when dies. Built with [gopsutil](https://github.com/shirou/gopsutil) and [gjson](https://github.com/tidwall/gjson).
+Simple program to poll processes for resources consumption and existence. On request it can revive a process that dies. Built with [gopsutil](https://github.com/shirou/gopsutil) and [gjson](https://github.com/tidwall/gjson).
 
 ## Build
 
@@ -71,8 +71,8 @@ Password:
     }
 }
 ```
-Each process group is identified by a name (like `firefox`) and all process bound to it are selected using one or more regular expression. The match is done using the executable path of the process (you can easly discover it with command `ps -A`). Defined constraints are expressed in percentage and are checked for all processes of a group.
+Each process group is identified by a name (like `firefox`) and all processes bound to it are selected using one or more regular expression. The match is done using the executable path of the process (you can easly discover it with command `ps -A`). Defined constraints are expressed in percentage and are checked for all processes of a group.
 
 ### Notes
-- Restarted processes will die, when `psguard` terminates in case it wasn't started in background (tested only on **macOS**).
-- For now it's a [Go language](https://golang.org/) learning project and not much tests has been done on it. 
+- Restarted processes will die, when `psguard` terminates in case it wasn't started in background (verified only on **macOS**).
+- For now it's a [Go language](https://golang.org/) learning project and not much tests has been done on it.
