@@ -20,7 +20,7 @@ func main() {
 		log.Fatal("Process list is empty")
 	}
 	if !constraints.HasProcesses() {
-		log.Fatal("Unable to bind any process")
+		log.Fatal("Unable to find any process")
 	}
 	messagges := constraints.Sanitize(*options)
 	for _, message := range messagges {
